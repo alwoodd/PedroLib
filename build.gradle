@@ -1,24 +1,29 @@
 
 plugins {
-    id 'com.android.library'
+    id 'com.android.library' version '8.7.3' apply false
 }
 
-group = 'org.lhssa.ftc'
+group = 'com.github.alwoodd' //For JitPack dependency coordinates
 version = '1.0.0'
 
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
+}
+
 //apply from: '../build.common.gradle'
-apply from: '../build.dependencies.gradle'
+//apply from: '../build.dependencies.gradle'
 
-android {
-    namespace 'org.lhssa.ftc.teamcode.pedroPathing'
-
-    compileSdk 36
-
-    defaultConfig {
-        minSdk 24
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
+//android {
+//    namespace 'org.lhssa.ftc.teamcode.pedroPathing'
+//
+//    compileSdk 36
+//
+//    defaultConfig {
+//        minSdk 24
+//
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//    }
 //
 //    buildTypes {
 //        release {
@@ -30,12 +35,12 @@ android {
 //        sourceCompatibility JavaVersion.VERSION_11
 //        targetCompatibility JavaVersion.VERSION_11
 //    }
-}
+//}
 
-dependencies {
+//dependencies {
 //    implementation 'androidx.appcompat:appcompat:1.7.1'
 //    implementation 'com.google.android.material:material:1.10.0'
-    testImplementation 'junit:junit:4.13.2'
+//    testImplementation 'junit:junit:4.13.2'
 //    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
 //    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-}
+//}
