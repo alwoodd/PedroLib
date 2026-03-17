@@ -2,3 +2,7 @@
 plugins {
     id 'com.android.library' version '8.7.0' apply false
 }
+
+//For JitPack dependency coordinates
+group = 'com.github.alwoodd'
+version = '1.0.0'

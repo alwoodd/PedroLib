@@ -34,8 +34,6 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 artifactId = 'PedroLib'
-                groupId = 'com.github.alwoodd' //For JitPack dependency coordinates
-                version = '1.0.0'
             }
         }
     }
