@@ -3,6 +3,9 @@ plugins {
     id 'maven-publish'
 }
 
+group = 'com.github.alwoodd'
+version = '1.0.1'
+
 android {
     namespace 'org.lhssa.ftc.teamcode.pedroPathing'
     compileSdk 36
@@ -25,7 +28,7 @@ dependencies {
     implementation 'org.firstinspires.ftc:Hardware:11.0.0'
     implementation 'org.firstinspires.ftc:FtcCommon:11.0.0'
 
-    implementation 'com.pedropathing:ftc:2.0.6'
+    implementation 'com.pedropathing:ftc:2.1.1'
 }
 
 afterEvaluate {
