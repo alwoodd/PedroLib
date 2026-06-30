@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.github.alwoodd'
-version = '1.0.1'
+version = '1.1.0'
 
 android {
     namespace 'org.lhssa.ftc.teamcode.pedroPathing'
@@ -23,12 +23,12 @@ android {
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'
-    implementation 'org.firstinspires.ftc:RobotCore:11.0.0'
-    implementation 'org.firstinspires.ftc:RobotServer:11.0.0'
-    implementation 'org.firstinspires.ftc:Hardware:11.0.0'
-    implementation 'org.firstinspires.ftc:FtcCommon:11.0.0'
+    implementation 'org.firstinspires.ftc:RobotCore:11.1.0'
+    implementation 'org.firstinspires.ftc:RobotServer:11.1.0'
+    implementation 'org.firstinspires.ftc:Hardware:11.1.0'
+    implementation 'org.firstinspires.ftc:FtcCommon:11.1.0'
 
-    implementation 'com.pedropathing:ftc:2.1.1'
+    implementation 'com.pedropathing:ftc:2.1.2'
 }
 
 afterEvaluate {
