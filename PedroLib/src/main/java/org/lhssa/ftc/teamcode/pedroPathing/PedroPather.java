@@ -87,8 +87,8 @@ public class PedroPather {
             workingEndPose = flipPose(endPose);
         }
         else {
-            workingStartPose = new Pose(startPose.getX(), startPose.getY(), startPose.getHeading());
-            workingEndPose = new Pose(endPose.getX(), endPose.getY(), endPose.getHeading());
+            workingStartPose = startPose;
+            workingEndPose = endPose;
         }
 
         return new Path(new BezierLine(workingStartPose, workingEndPose));
