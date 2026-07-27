@@ -26,7 +26,7 @@ public class PedroMotion {
      * @param path Path to follow
      */
     public void goPath(Path path) {
-        if (follower.isBusy() || path == priorPath) {
+        if (follower.isBusy() || pathsEqual(path, priorPath)) {
             return;
         }
 
@@ -52,7 +52,7 @@ public class PedroMotion {
 
     /**
      * Decides if a regular followPath() should be called, a heading-only "turnTo"
-     * (although this is implemented using followPath() as well), or holdPoint(), depending in what
+     * (although this is implemented using followPath() as well), or holdPoint(), depending on what
      * ways the path's poses differ from each other.
      * This method can be called repeatedly, without regard to the Follower's state.
      * @param path Path to follow
@@ -60,7 +60,7 @@ public class PedroMotion {
      */
     public void goPath(Path path, double power) {
         //Yes, this is a test of reference equality.
-        if (follower.isBusy() || path == priorPath) {
+        if (follower.isBusy() || pathsEqual(path, priorPath)) {
             return;
         }
 
@@ -107,7 +107,7 @@ public class PedroMotion {
      * @param path Path whose Poses are to be evaluated
      * @return true if the passed path's poses have the same (X,Y) values
      */
-    private boolean posesHaveSameXY(Path path) {
+    boolean posesHaveSameXY(Path path) {
         Pose startPose = path.getFirstControlPoint();
         Pose endPose = path.getLastControlPoint();
 
@@ -120,10 +120,34 @@ public class PedroMotion {
      * @param path Path whose Poses are to be evaluated
      * @return true if the passed path's headings have the same value
      */
-    private boolean posesHaveSameHeading(Path path) {
+    boolean posesHaveSameHeading(Path path) {
         Pose startPose = path.getFirstControlPoint();
         Pose endPose = path.getLastControlPoint();
 
         return (startPose.getHeading() == endPose.getHeading());
+    }
+
+    /**
+     * Compares two paths to see if their poses have the same X, Y, and headings.
+     * @param pathA A Path to be compared
+     * @param pathB A Path to be compared
+     * @return true if the paths' poses have the same X, Y, and headings.
+     */
+    boolean pathsEqual(Path pathA, Path pathB) {
+        if (pathA == null || pathB == null) {
+            return false;
+        }
+
+        Pose pathAstartPose = pathA.getFirstControlPoint();
+        Pose pathAendPose = pathA.getLastControlPoint();
+        Pose pathBstartPose = pathB.getFirstControlPoint();
+        Pose pathBendPose = pathB.getLastControlPoint();
+
+        return (pathAstartPose.getX() == pathBstartPose.getX() &&
+            pathAstartPose.getY() == pathBstartPose.getY() &&
+            pathAstartPose.getHeading() == pathBstartPose.getHeading() &&
+            pathAendPose.getX() == pathBendPose.getX() &&
+            pathAendPose.getY() == pathBendPose.getY() &&
+            pathAendPose.getHeading() == pathBendPose.getHeading());
     }
 }
