@@ -18,7 +18,6 @@ public class PedroPathTelemetry {
         this.telemetry = telemetry;
         this.follower = follower;
         this.currentColor = currentColor;
-        resetTelemetryItems();
     }
 
     /**
@@ -26,9 +25,7 @@ public class PedroPathTelemetry {
      * @param message custom message, such as "Going from wall to launch zone".
      */
     public void pathTelemetry(String message) {
-        if (telemetry.isAutoClear()) {
-            resetTelemetryItems();
-        }
+        resetTelemetryItems();
         allianceColorItem.setValue(currentColor.toString());
         telemetry.addLine();
         telemetry.addLine(message);
@@ -51,6 +48,8 @@ public class PedroPathTelemetry {
      * (Re)Add Alliance telemetry.
      */
     private void resetTelemetryItems() {
-        this.allianceColorItem = telemetry.addData("Alliance", currentColor.toString());
+        if (telemetry.isAutoClear() || allianceColorItem == null) {
+            this.allianceColorItem = telemetry.addData("Alliance", currentColor.toString());
+        }
     }
 }
