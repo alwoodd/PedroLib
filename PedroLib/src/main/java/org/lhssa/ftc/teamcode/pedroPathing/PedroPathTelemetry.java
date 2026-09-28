@@ -1,6 +1,7 @@
 package org.lhssa.ftc.teamcode.pedroPathing;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.math.Pose;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -29,9 +30,10 @@ public class PedroPathTelemetry {
         allianceColorItem.setValue(currentColor.toString());
         telemetry.addLine();
         telemetry.addLine(message);
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", Math.toDegrees(follower.getPose().getHeading()));
+        Pose followerPose = follower.pose();
+        telemetry.addData("x", followerPose.x());
+        telemetry.addData("y", followerPose.y());
+        telemetry.addData("heading", Math.toDegrees(followerPose.heading()));
         telemetry.update();
     }
 

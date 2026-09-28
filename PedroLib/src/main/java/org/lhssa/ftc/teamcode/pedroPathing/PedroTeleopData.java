@@ -1,6 +1,6 @@
 package org.lhssa.ftc.teamcode.pedroPathing;
 
-import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Pose;
 
 /**
  * This class exists solely to preserve data between Autonomous and Teleop modes.

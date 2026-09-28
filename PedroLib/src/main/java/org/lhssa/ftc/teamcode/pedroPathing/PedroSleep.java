@@ -37,8 +37,21 @@ public class PedroSleep {
      * @param milliseconds Total ms to sleep before returning control back to caller.
      */
     public void sleep(long milliseconds) {
+        stopRobot();
+
         for (long m = 0; m < milliseconds; m += updateFrequency) {
             sleepImpl(updateFrequency);
+            follower.update();
+        }
+    }
+
+    /**
+     * Make sure the robot is stopped before sleeping.
+     * Otherwise, it will probably keep moving randomly.
+     */
+    private void stopRobot() {
+        if (!follower.idle()) {
+            follower.stop();
             follower.update();
         }
     }

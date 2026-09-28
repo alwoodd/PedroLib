@@ -1,31 +1,42 @@
 package org.lhssa.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.algorithm.Foresight;
+import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 
 /**
  * This class manages how the Follower is used.
  */
 public class PedroMotion {
     private final Follower follower;
+    private final ForesightConfig foresightConfig;
+
     private final double EPSILON = .001;
     private Path priorPath = null;
 
     public PedroMotion(Follower follower) {
         this.follower = follower;
+        /*
+         * Get a reference to the ForesightConfig.
+         * The follower's algorithm refers to the Foresight it was constructed with.
+         * The Foresite's config is the ForesightConfig that *it* was constructed with.
+         * Are we loving Pedro 3.0's architecture yet?
+         */
+        Foresight foresight = (Foresight)follower.algorithm();
+        this.foresightConfig = foresight.config;
     }
 
     /**
-     * Decides if a regular followPath() should be called, a heading-only "turnTo"
-     * (although this is implemented using followPath() as well), or holdPoint(), depending in what
+     * Decides if a regular follow() should be called, a heading-only "turnTo"
+     * (although this is implemented using followPath() as well), or holdPoint(), depending on what
      * ways the path's poses differ from each other.
      * This method can be called repeatedly, without regard to the Follower's state.
      * @param path Path to follow
      */
     public void goPath(Path path) {
+//        RobotLog.ii("PedroMotion", "goPath() called");
         if (follower.isBusy() || pathsEqual(path, priorPath)) {
             return;
         }
@@ -34,19 +45,27 @@ public class PedroMotion {
 
         //Path poses have different (X,Y).
         if (!posesHaveSameXY(path)) {
-            follower.followPath(path);
+//            RobotLog.ii("PedroMotion", "follow() called");
+            follower.follow(path);
         }
         //Path poses have same (X,Y), but different headings.
         else if (!posesHaveSameHeading(path)) {
+//            RobotLog.ii("PedroMotion", "poses have different headings");
+            Pose endPose = path.endPose();
+            follower.setHeading(endPose.heading());
+            follower.hold(endPose);
+/*
             Path newPath = bumpEndY(path);
-            follower.followPath(newPath);
+            follower.follow(newPath);
+*/
 
             //NOTE: I couldn't get turnTo() to stop oscillating.
             //follower.turnTo(path.getLastControlPoint().getHeading());
         }
         //Path poses have same (X,Y), and same headings.
         else {
-            follower.holdPoint(path.getLastControlPoint());
+//            RobotLog.ii("PedroMotion", "hold() called");
+            follower.hold(path.endPose());
         }
     }
 
@@ -64,17 +83,24 @@ public class PedroMotion {
             return;
         }
 
+        path = path.with(foresightConfig.maxPathSpeed.at(power));
         priorPath = path;
 
         if (!posesHaveSameXY(path)) {
-            follower.followPath(new PathChain(path), power, true);
+            follower.follow(path);
         }
         else if (!posesHaveSameHeading(path)) {
-            Path newPath = bumpEndY(path);
-            follower.followPath(new PathChain(newPath), power, true);
+            Pose endPose = path.endPose();
+            follower.setHeading(endPose.heading());
+            follower.hold(endPose);
+
+/*
+            path = bumpEndY(path);
+            follower.follow(path);
+*/
         }
         else {
-            follower.holdPoint(path.getLastControlPoint());
+            follower.hold(path.endPose());
         }
     }
 
@@ -91,6 +117,7 @@ public class PedroMotion {
      * @param path Path to bump
      * @return Path with to-Pose's Y value bumped
      */
+/*
     private Path bumpEndY(Path path) {
         Pose startPose = path.getFirstControlPoint();
         Pose endPose = path.getLastControlPoint();
@@ -101,6 +128,7 @@ public class PedroMotion {
 
         return newPath;
     }
+*/
 
     /**
      * Evaluate if the passed path's poses have the same (X,Y) values.
@@ -108,11 +136,11 @@ public class PedroMotion {
      * @return true if the passed path's poses have the same (X,Y) values
      */
     boolean posesHaveSameXY(Path path) {
-        Pose startPose = path.getFirstControlPoint();
-        Pose endPose = path.getLastControlPoint();
+        Pose startPose = path.get(0);
+        Pose endPose = path.get(1);
 
-        return (startPose.getX() == endPose.getX() &&
-                startPose.getY() == endPose.getY());
+        return (startPose.x() == endPose.x() &&
+                startPose.y() == endPose.y());
     }
 
     /**
@@ -121,10 +149,10 @@ public class PedroMotion {
      * @return true if the passed path's headings have the same value
      */
     boolean posesHaveSameHeading(Path path) {
-        Pose startPose = path.getFirstControlPoint();
-        Pose endPose = path.getLastControlPoint();
+        Pose startPose = path.get(0);
+        Pose endPose = path.get(1);
 
-        return (startPose.getHeading() == endPose.getHeading());
+        return (startPose.heading() == endPose.heading());
     }
 
     /**
@@ -138,16 +166,16 @@ public class PedroMotion {
             return false;
         }
 
-        Pose pathAstartPose = pathA.getFirstControlPoint();
-        Pose pathAendPose = pathA.getLastControlPoint();
-        Pose pathBstartPose = pathB.getFirstControlPoint();
-        Pose pathBendPose = pathB.getLastControlPoint();
+        Pose pathAstartPose = pathA.get(0);
+        Pose pathAendPose = pathA.get(1);
+        Pose pathBstartPose = pathB.get(0);
+        Pose pathBendPose = pathB.get(1);
 
-        return (pathAstartPose.getX() == pathBstartPose.getX() &&
-            pathAstartPose.getY() == pathBstartPose.getY() &&
-            pathAstartPose.getHeading() == pathBstartPose.getHeading() &&
-            pathAendPose.getX() == pathBendPose.getX() &&
-            pathAendPose.getY() == pathBendPose.getY() &&
-            pathAendPose.getHeading() == pathBendPose.getHeading());
+        return (pathAstartPose.x() == pathBstartPose.x() &&
+            pathAstartPose.y() == pathBstartPose.y() &&
+            pathAstartPose.heading() == pathBstartPose.heading() &&
+            pathAendPose.x() == pathBendPose.x() &&
+            pathAendPose.y() == pathBendPose.y() &&
+            pathAendPose.heading() == pathBendPose.heading());
     }
 }

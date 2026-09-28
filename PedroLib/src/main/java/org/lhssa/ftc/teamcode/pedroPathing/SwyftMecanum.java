@@ -1,8 +1,9 @@
 package org.lhssa.ftc.teamcode.pedroPathing;
 
-import com.pedropathing.ftc.drivetrains.Mecanum;
-import com.pedropathing.ftc.drivetrains.MecanumConstants;
+import com.pedropathing.revhub.drivetrains.Mecanum;
+import com.pedropathing.revhub.drivetrains.MecanumConfig;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /**
@@ -15,13 +16,23 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
  */
 public class SwyftMecanum extends Mecanum {
     /**
+     * Constructor
      * @param hardwareMap      this is the HardwareMap object that contains the motors and other hardware
-     * @param mecanumConstants this is the MecanumConstants object that contains the names of the motors and directions etc.
+     * @param mecanumConfig    this is used by the super class's constructor.
      */
-    public SwyftMecanum(HardwareMap hardwareMap, MecanumConstants mecanumConstants) {
-        super(hardwareMap, mecanumConstants);
+    public SwyftMecanum(HardwareMap hardwareMap, MecanumConfig mecanumConfig) {
+        super(hardwareMap, mecanumConfig);
 
-        for (DcMotor motor : this.getMotors()) {
+        DcMotorEx[] motors;
+
+        motors = new DcMotorEx[]{
+                (hardwareMap.get(DcMotorEx.class, config.frontLeftName.get())),
+                (hardwareMap.get(DcMotorEx.class, config.frontRightName.get())),
+                (hardwareMap.get(DcMotorEx.class, config.backLeftName.get())),
+                (hardwareMap.get(DcMotorEx.class, config.backRightName.get()))
+        };
+
+        for (DcMotor motor : motors) {
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
     }

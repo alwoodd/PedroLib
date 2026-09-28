@@ -1,6 +1,7 @@
 package org.lhssa.ftc.teamcode.pedroPathing;
 
-import com.pedropathing.geometry.Pose;
+
+import com.pedropathing.math.Pose;
 
 /**
  * Key object used by caching in TeamPaths.
@@ -49,8 +50,8 @@ public class PathKey {
     }
 
     private boolean posesEqual(Pose pose1, Pose pose2) {
-        return (pose1.getX() == pose2.getX() &&
-                pose1.getY() == pose2.getY() &&
-                pose1.getHeading() == pose2.getHeading());
+        return (pose1.x() == pose2.x() &&
+                pose1.y() == pose2.y() &&
+                pose1.heading() == pose2.heading());
     }
 }

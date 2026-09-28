@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.firstinspires.ftc:Hardware:12.0.0'
     implementation 'org.firstinspires.ftc:FtcCommon:12.0.0'
 
-    implementation 'com.pedropathing:ftc:2.1.2'
+    implementation 'com.pedropathing:revhub:3.0.0'
 }
 
 afterEvaluate {

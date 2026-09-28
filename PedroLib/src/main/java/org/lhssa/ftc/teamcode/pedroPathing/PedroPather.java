@@ -1,9 +1,9 @@
 package org.lhssa.ftc.teamcode.pedroPathing;
 
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.math.MathFunctions;
+import com.pedropathing.api.Paths;
+import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
+import com.pedropathing.utils.Angle;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,17 +17,22 @@ public class PedroPather {
 
     private final Map<PathKey, Path> cache;
 
+    /**
+     * Constructor
+     * @param canonicalColor The default AllianceColor
+     * @param allianceColor  The current AllianceColor
+     */
     public PedroPather(AllianceColor canonicalColor, AllianceColor allianceColor) {
         this.mustFlip = allianceColor != canonicalColor;
         this.cache = new HashMap<>();
     }
 
     /**
-     * Create BezierLine Path using the passed startPose, endPose, and headingInterpolationType.
+     * createPath using the passed startPose, endPose, and headingInterpolationType.
      * The headings come from the start and end Pose headings.
      * Paths are cached, so it is ok to call this method repeatedly.
-     * @param startPose start Pose of BezierLine
-     * @param endPose end Pose of BezierLine
+     * @param startPose start Pose of Line
+     * @param endPose end Pose of Line
      * @param headingInterpolationType LINEAR, TANGENT, CONSTANT
      * @return Path
      */
@@ -38,18 +43,19 @@ public class PedroPather {
         }
         else {
             Path newPath = createPath(startPose, endPose);
-            setHeadingInterpolation(newPath, headingInterpolationType);
+            newPath = setHeadingInterpolation(startPose, endPose, newPath, headingInterpolationType);
             cache.put(k, newPath);
             return newPath;
         }
     }
 
     /**
-     * Create BezierLine Path using the passed startPose and endPose. HeadingInterpolationType is
-     * LINEAR.
+     * createPath using the passed startPose and endPose.
+     * The headings come from the start and end Pose headings,
+     * and the heading interpolation is LINEAR.
      * Paths are cached, so it is ok to call this method repeatedly.
-     * @param startPose start Pose of BezierLine
-     * @param endPose end Pose of BezierLine
+     * @param startPose start Pose of Line
+     * @param endPose end Pose of Line
      * @return Path
      */
     public Path pathBetween(Pose startPose, Pose endPose) {
@@ -72,10 +78,10 @@ public class PedroPather {
     }
 
     /**
-     * Create a BezierLine Path using the passed start and end Poses.
+     * Create a straight line Path using the passed start and end Poses.
      * The passed Poses are flipped as needed.
-     * @param startPose start Pose of BezierLine
-     * @param endPose end Pose of BezierLine
+     * @param startPose start Pose of Line
+     * @param endPose end Pose of Line
      * @return Path
      */
     private Path createPath(Pose startPose, Pose endPose) {
@@ -91,34 +97,39 @@ public class PedroPather {
             workingEndPose = endPose;
         }
 
-        return new Path(new BezierLine(workingStartPose, workingEndPose));
+        return Paths.line(workingStartPose, workingEndPose);
     }
 
     /**
-     * Call appropriate setXXXHeadingInterpolation based on passed headingInterpolationType.
-     * @param path Path to set heading interpolation on
-     * @param headingInterpolationType drives which setXXXHeadingInterpolation() to call
+     * Call appropriate heading interpolator function based on passed headingInterpolationType.
+     * @param startPose startPose
+     * @param endPose endPose
+     * @param path Path we want to run interpolator function on.
+     * @param headingInterpolationType HeadingInterpolationType
+     * @return Path returned by the various interpolator functions.
      */
-    private void setHeadingInterpolation(Path path, HeadingInterpolationType headingInterpolationType) {
+    private Path setHeadingInterpolation(Pose startPose, Pose endPose, Path path, HeadingInterpolationType headingInterpolationType) {
+        Path returnPath = path; //Value of returnPath if no CASE applies.
+
         switch (headingInterpolationType) {
             case LINEAR:
-                path.setLinearHeadingInterpolation(path.getFirstControlPoint().getHeading(),
-                        path.getLastControlPoint().getHeading());
+                returnPath = path.linear(startPose, endPose);
                 break;
             case TANGENT:
-                path.setTangentHeadingInterpolation();
+                returnPath = path.tangent();
                 break;
             case CONSTANT:
-                path.setConstantHeadingInterpolation(path.getLastControlPoint().getHeading());
+                returnPath = path.constant(startPose);
                 break;
         }
 
+        return returnPath;
     }
 
     private Pose flipPose(Pose oldPose) {
         return new Pose(
-            144 - oldPose.getX(),
-            oldPose.getY(),
-            MathFunctions.normalizeAngle(Math.PI - oldPose.getHeading()));
+            144 - oldPose.x(),
+            oldPose.y(),
+                Angle.normalize(Math.PI - oldPose.heading()));
     }
 }
