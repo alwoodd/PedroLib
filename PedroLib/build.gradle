@@ -21,16 +21,37 @@ android {
     }
 }
 
+configurations {
+    mockitoAgent
+}
+
 dependencies {
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:5.23.0'
+    testImplementation 'org.mockito:mockito-core:5.24.0'
+    mockitoAgent('org.mockito:mockito-core:5.24.0') {
+        transitive = false
+    }
 
+    //noinspection Aligned16KB
     implementation 'org.firstinspires.ftc:RobotCore:12.0.0'
     implementation 'org.firstinspires.ftc:RobotServer:12.0.0'
     implementation 'org.firstinspires.ftc:Hardware:12.0.0'
     implementation 'org.firstinspires.ftc:FtcCommon:12.0.0'
 
-    implementation 'com.pedropathing:revhub:3.0.0'
+    implementation 'com.pedropathing:revhub:3.0.1'
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgumentProviders.add(new CommandLineArgumentProvider() {
+        @InputFiles
+        @PathSensitive(PathSensitivity.RELATIVE)
+        FileCollection mockitoAgent = configurations.mockitoAgent
+
+        @Override
+        Iterable<String> asArguments() {
+            ["-javaagent:${mockitoAgent.asPath}"]
+        }
+    })
 }
 
 afterEvaluate {

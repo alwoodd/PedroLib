@@ -1,15 +1,14 @@
 package org.lhssa.ftc.teamcode.pedroActions;
 
-import com.pedropathing.paths.Path;
-
 import org.lhssa.ftc.teamcode.pedroPathing.PedroMotion;
+import org.lhssa.ftc.teamcode.pedroPathing.PedroPathData;
 
 /**
  * PedroAction that follows the passed Path, then runs the passed callback
  * at Path completion.
  */
 public class PedroActionWithRunnable implements PedroAction {
-    private final Path path;
+    private final PedroPathData path;
     private final Runnable callBack;
     private final PedroMotion pedroMotion;
     private final String description;
@@ -25,7 +24,7 @@ public class PedroActionWithRunnable implements PedroAction {
      * @param pedroMotion PedroMotion instance
      * @param callBack Runnable class or method invoked after Path is complete.
      */
-    public PedroActionWithRunnable(String description, Path path, PedroMotion pedroMotion, Runnable callBack) {
+    public PedroActionWithRunnable(String description, PedroPathData path, PedroMotion pedroMotion, Runnable callBack) {
         this.path = path;
         this.callBack = callBack;
         this.pedroMotion = pedroMotion;
@@ -41,7 +40,7 @@ public class PedroActionWithRunnable implements PedroAction {
      * @param speed Speed Follower will use
      * @param callBack Runnable class or method invoked after Path is complete.
      */
-    public PedroActionWithRunnable(String description, Path path, PedroMotion pedroMotion, double speed, Runnable callBack) {
+    public PedroActionWithRunnable(String description, PedroPathData path, PedroMotion pedroMotion, double speed, Runnable callBack) {
         this.path = path;
         this.callBack = callBack;
         this.pedroMotion = pedroMotion;

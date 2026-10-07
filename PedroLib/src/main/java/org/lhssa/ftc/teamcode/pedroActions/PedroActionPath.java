@@ -1,14 +1,13 @@
 package org.lhssa.ftc.teamcode.pedroActions;
 
-import com.pedropathing.paths.Path;
-
 import org.lhssa.ftc.teamcode.pedroPathing.PedroMotion;
+import org.lhssa.ftc.teamcode.pedroPathing.PedroPathData;
 
 /**
  * PedroAction that just follows the passed Path.
  */
 public class PedroActionPath implements PedroAction{
-    private final Path path;
+    private final PedroPathData path;
     private final PedroMotion pedroMotion;
     private final String description;
     private final double speed;
@@ -19,7 +18,7 @@ public class PedroActionPath implements PedroAction{
      * @param path Path to follow
      * @param pedroMotion PedroMotion instance
      */
-    public PedroActionPath(String description, Path path, PedroMotion pedroMotion) {
+    public PedroActionPath(String description, PedroPathData path, PedroMotion pedroMotion) {
         this.path = path;
         this.pedroMotion = pedroMotion;
         this.description = description;
@@ -33,7 +32,7 @@ public class PedroActionPath implements PedroAction{
      * @param pedroMotion PedroMotion instance
      * @param speed Speed Follower will use
      */
-    public PedroActionPath(String description, Path path, PedroMotion pedroMotion, double speed) {
+    public PedroActionPath(String description, PedroPathData path, PedroMotion pedroMotion, double speed) {
         this.path = path;
         this.pedroMotion = pedroMotion;
         this.description = description;

@@ -1,8 +1,6 @@
 package org.lhssa.ftc.teamcode.pedroPathing;
 
-import com.pedropathing.api.Paths;
 import com.pedropathing.math.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.utils.Angle;
 
 import java.util.HashMap;
@@ -15,7 +13,7 @@ public class PedroPather {
     private final AllianceColor definedPoseColor = AllianceColor.RED;
     private final boolean mustFlip;
 
-    private final Map<PathKey, Path> cache;
+    private final Map<PathKey, PedroPathData> cache;
 
     /**
      * Constructor
@@ -36,14 +34,14 @@ public class PedroPather {
      * @param headingInterpolationType LINEAR, TANGENT, CONSTANT
      * @return Path
      */
-    public Path pathBetween(Pose startPose, Pose endPose, HeadingInterpolationType headingInterpolationType) {
+    public PedroPathData pathBetween(Pose startPose, Pose endPose, HeadingInterpolationType headingInterpolationType) {
         PathKey k = new PathKey(startPose, endPose, headingInterpolationType);
         if (cache.containsKey(k)) {
             return cache.get(k);
         }
         else {
-            Path newPath = createPath(startPose, endPose);
-            newPath = setHeadingInterpolation(startPose, endPose, newPath, headingInterpolationType);
+            PedroPathData newPath = createPath(headingInterpolationType, startPose, endPose);
+            //newPath = setHeadingInterpolation(startPose, endPose, newPath, headingInterpolationType);
             cache.put(k, newPath);
             return newPath;
         }
@@ -58,7 +56,7 @@ public class PedroPather {
      * @param endPose end Pose of Line
      * @return Path
      */
-    public Path pathBetween(Pose startPose, Pose endPose) {
+    public PedroPathData pathBetween(Pose startPose, Pose endPose) {
         return this.pathBetween(startPose, endPose, HeadingInterpolationType.LINEAR);
     }
 
@@ -84,7 +82,7 @@ public class PedroPather {
      * @param endPose end Pose of Line
      * @return Path
      */
-    private Path createPath(Pose startPose, Pose endPose) {
+    private PedroPathData createPath(HeadingInterpolationType headingInterpolationType, Pose startPose, Pose endPose) {
         Pose workingStartPose;
         Pose workingEndPose;
 
@@ -97,10 +95,10 @@ public class PedroPather {
             workingEndPose = endPose;
         }
 
-        return Paths.line(workingStartPose, workingEndPose);
+        return new PedroPathData(headingInterpolationType, workingStartPose, workingEndPose);
     }
 
-    /**
+    /*    /**
      * Call appropriate heading interpolator function based on passed headingInterpolationType.
      * @param startPose startPose
      * @param endPose endPose
@@ -108,6 +106,7 @@ public class PedroPather {
      * @param headingInterpolationType HeadingInterpolationType
      * @return Path returned by the various interpolator functions.
      */
+/*
     private Path setHeadingInterpolation(Pose startPose, Pose endPose, Path path, HeadingInterpolationType headingInterpolationType) {
         Path returnPath = path; //Value of returnPath if no CASE applies.
 
@@ -125,6 +124,7 @@ public class PedroPather {
 
         return returnPath;
     }
+*/
 
     private Pose flipPose(Pose oldPose) {
         return new Pose(

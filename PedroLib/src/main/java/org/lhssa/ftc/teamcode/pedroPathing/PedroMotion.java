@@ -4,7 +4,7 @@ import com.pedropathing.algorithm.Foresight;
 import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
-import com.pedropathing.paths.Path;
+import com.pedropathing.utils.Angle;
 
 /**
  * This class manages how the Follower is used.
@@ -13,8 +13,10 @@ public class PedroMotion {
     private final Follower follower;
     private final ForesightConfig foresightConfig;
 
-    private final double EPSILON = .001;
-    private Path priorPath = null;
+    private final double EPSILON_RADIANS = Math.toRadians(2);
+    private PedroPathData priorPath = null;
+    private double targetHeading;
+    private boolean isFollowing = false;
 
     public PedroMotion(Follower follower) {
         this.follower = follower;
@@ -29,115 +31,98 @@ public class PedroMotion {
     }
 
     /**
-     * Decides if a regular follow() should be called, a heading-only "turnTo"
-     * (although this is implemented using followPath() as well), or holdPoint(), depending on what
-     * ways the path's poses differ from each other.
+     * Decides if follow() or hold() should be called
      * This method can be called repeatedly, without regard to the Follower's state.
      * @param path Path to follow
      */
-    public void goPath(Path path) {
-//        RobotLog.ii("PedroMotion", "goPath() called");
+    public void goPath(PedroPathData path) {
         if (follower.isBusy() || pathsEqual(path, priorPath)) {
             return;
         }
 
         priorPath = path;
 
-        //Path poses have different (X,Y).
+        /*
+         * We follow the path if either the path's pose's X or Y differ.
+         * Otherwise, we just hold the path's end pose. Holding will turn
+         * the robot if its current heading is different.
+         */
         if (!posesHaveSameXY(path)) {
-//            RobotLog.ii("PedroMotion", "follow() called");
-            follower.follow(path);
+            follower.follow(path.toPath());
+            isFollowing = true;
         }
-        //Path poses have same (X,Y), but different headings.
-        else if (!posesHaveSameHeading(path)) {
-//            RobotLog.ii("PedroMotion", "poses have different headings");
-            Pose endPose = path.endPose();
-            follower.setHeading(endPose.heading());
-            follower.hold(endPose);
-/*
-            Path newPath = bumpEndY(path);
-            follower.follow(newPath);
-*/
-
-            //NOTE: I couldn't get turnTo() to stop oscillating.
-            //follower.turnTo(path.getLastControlPoint().getHeading());
-        }
-        //Path poses have same (X,Y), and same headings.
         else {
-//            RobotLog.ii("PedroMotion", "hold() called");
-            follower.hold(path.endPose());
+            Pose endPose = path.getEndPose();
+            follower.hold(endPose);
+            isFollowing = false;
+            targetHeading = endPose.heading();
         }
     }
 
     /**
-     * Decides if a regular followPath() should be called, a heading-only "turnTo"
-     * (although this is implemented using followPath() as well), or holdPoint(), depending on what
-     * ways the path's poses differ from each other.
+     * Decides if follow() or hold() should be called
      * This method can be called repeatedly, without regard to the Follower's state.
      * @param path Path to follow
      * @param power Power for this path
      */
-    public void goPath(Path path, double power) {
-        //Yes, this is a test of reference equality.
+    public void goPath(PedroPathData path, double power) {
         if (follower.isBusy() || pathsEqual(path, priorPath)) {
             return;
         }
 
-        path = path.with(foresightConfig.maxPathSpeed.at(power));
         priorPath = path;
 
+        /*
+         * We follow the path if either the path's pose's X or Y differ.
+         * Otherwise, we just hold the path's end pose. Holding will turn
+         * the robot if its current heading is different.
+         */
         if (!posesHaveSameXY(path)) {
-            follower.follow(path);
-        }
-        else if (!posesHaveSameHeading(path)) {
-            Pose endPose = path.endPose();
-            follower.setHeading(endPose.heading());
-            follower.hold(endPose);
-
-/*
-            path = bumpEndY(path);
-            follower.follow(path);
-*/
+            follower.follow(path.toPath().with(foresightConfig.maxPathSpeed.at(power)));
+            isFollowing = true;
         }
         else {
-            follower.hold(path.endPose());
+            Pose endPose = path.getEndPose();
+            follower.hold(endPose);
+            isFollowing = false;
+            targetHeading = endPose.heading();
         }
     }
 
     /**
-     * An alternative to testing !follower.isBusy().
-     * @return true if the robot is not currently following a path.
+     * @return true if the robot is finished moving.
      */
     public boolean isPathComplete() {
-        return !follower.isBusy();
+        boolean pathComplete;
+
+        if (isFollowing) {
+            pathComplete = !follower.isBusy();
+        }
+        else {
+            pathComplete = isAtTargetHeading();
+        }
+
+        return pathComplete;
     }
 
     /**
-     * Make endPose's Y just a little different so followPath will move the robot.
-     * @param path Path to bump
-     * @return Path with to-Pose's Y value bumped
+     * @return true if the robot's heading is withing EPSILON_RADIAN of its target.
      */
-/*
-    private Path bumpEndY(Path path) {
-        Pose startPose = path.getFirstControlPoint();
-        Pose endPose = path.getLastControlPoint();
-        //Make endPose's Y just a little different so followPath will move the robot.
-        endPose = new Pose(endPose.getX(), endPose.getY() + EPSILON, endPose.getHeading());
-        Path newPath = new Path(new BezierLine(startPose, endPose));
-        newPath.setConstantHeadingInterpolation(endPose.getHeading());
+    boolean isAtTargetHeading() {
+        double delta = Angle.normalize(follower.pose().heading() - targetHeading);
 
-        return newPath;
+        return (Math.abs(delta) < Math.toRadians(EPSILON_RADIANS));
     }
-*/
 
     /**
      * Evaluate if the passed path's poses have the same (X,Y) values.
      * @param path Path whose Poses are to be evaluated
      * @return true if the passed path's poses have the same (X,Y) values
      */
-    boolean posesHaveSameXY(Path path) {
-        Pose startPose = path.get(0);
-        Pose endPose = path.get(1);
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    boolean posesHaveSameXY(PedroPathData path) {
+        Pose startPose = path.getStartPose();
+        Pose endPose = path.getEndPose();
 
         return (startPose.x() == endPose.x() &&
                 startPose.y() == endPose.y());
@@ -148,9 +133,9 @@ public class PedroMotion {
      * @param path Path whose Poses are to be evaluated
      * @return true if the passed path's headings have the same value
      */
-    boolean posesHaveSameHeading(Path path) {
-        Pose startPose = path.get(0);
-        Pose endPose = path.get(1);
+    boolean posesHaveSameHeading(PedroPathData path) {
+        Pose startPose = path.getStartPose();
+        Pose endPose = path.getEndPose();
 
         return (startPose.heading() == endPose.heading());
     }
@@ -161,15 +146,15 @@ public class PedroMotion {
      * @param pathB A Path to be compared
      * @return true if the paths' poses have the same X, Y, and headings.
      */
-    boolean pathsEqual(Path pathA, Path pathB) {
+    boolean pathsEqual(PedroPathData pathA, PedroPathData pathB) {
         if (pathA == null || pathB == null) {
             return false;
         }
 
-        Pose pathAstartPose = pathA.get(0);
-        Pose pathAendPose = pathA.get(1);
-        Pose pathBstartPose = pathB.get(0);
-        Pose pathBendPose = pathB.get(1);
+        Pose pathAstartPose = pathA.getStartPose();
+        Pose pathAendPose = pathA.getEndPose();
+        Pose pathBstartPose = pathB.getStartPose();
+        Pose pathBendPose = pathB.getEndPose();
 
         return (pathAstartPose.x() == pathBstartPose.x() &&
             pathAstartPose.y() == pathBstartPose.y() &&
