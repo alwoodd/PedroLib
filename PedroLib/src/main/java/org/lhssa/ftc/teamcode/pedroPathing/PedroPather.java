@@ -5,6 +5,7 @@ import com.pedropathing.utils.Angle;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * This class creates and returns Paths created from passed Poses.
@@ -12,17 +13,23 @@ import java.util.Map;
 public class PedroPather {
     private final AllianceColor definedPoseColor = AllianceColor.RED;
     private final boolean mustFlip;
+    private final Function<Pose, Pose> flipFunction;
 
     private final Map<PathKey, PedroPathData> cache;
 
     /**
      * Constructor
+     * The passed flipFunction can be the static
+     * Pose FlipRoutineAlliancesOnSameSide(Pose) or FlipRoutineAlliancesOnOppositeSides(Pose),
+     * or any other implementation that takes and returns a Pose.
      * @param canonicalColor The default AllianceColor
      * @param allianceColor  The current AllianceColor
+     * @param flipFunction A Function<Pose, Pose> called to correctly flip a Pose.
      */
-    public PedroPather(AllianceColor canonicalColor, AllianceColor allianceColor) {
+    public PedroPather(AllianceColor canonicalColor, AllianceColor allianceColor, Function<Pose,Pose> flipFunction) {
         this.mustFlip = allianceColor != canonicalColor;
         this.cache = new HashMap<>();
+        this.flipFunction = flipFunction;
     }
 
     /**
@@ -69,7 +76,7 @@ public class PedroPather {
         Pose returnedPose = pose;
 
         if (mustFlip) {
-            returnedPose = flipPose(pose);
+            returnedPose = flipFunction.apply(pose);
         }
 
         return returnedPose;
@@ -87,8 +94,8 @@ public class PedroPather {
         Pose workingEndPose;
 
         if (mustFlip) {
-            workingStartPose = flipPose(startPose);
-            workingEndPose = flipPose(endPose);
+            workingStartPose = flipFunction.apply(startPose);
+            workingEndPose = flipFunction.apply(endPose);
         }
         else {
             workingStartPose = startPose;
@@ -98,38 +105,30 @@ public class PedroPather {
         return new PedroPathData(headingInterpolationType, workingStartPose, workingEndPose);
     }
 
-    /*    /**
-     * Call appropriate heading interpolator function based on passed headingInterpolationType.
-     * @param startPose startPose
-     * @param endPose endPose
-     * @param path Path we want to run interpolator function on.
-     * @param headingInterpolationType HeadingInterpolationType
-     * @return Path returned by the various interpolator functions.
+    /**
+     * Pose flipper that can be used when RED and BLUE alliances are on the same
+     * side of the field; i.e., the X coordinate is flipped, Y stays the same,
+     * and the heading is subtracted from PI.
+     * @param oldPose Pose to be flipped
+     * @return new Pose
      */
-/*
-    private Path setHeadingInterpolation(Pose startPose, Pose endPose, Path path, HeadingInterpolationType headingInterpolationType) {
-        Path returnPath = path; //Value of returnPath if no CASE applies.
-
-        switch (headingInterpolationType) {
-            case LINEAR:
-                returnPath = path.linear(startPose, endPose);
-                break;
-            case TANGENT:
-                returnPath = path.tangent();
-                break;
-            case CONSTANT:
-                returnPath = path.constant(startPose);
-                break;
-        }
-
-        return returnPath;
-    }
-*/
-
-    private Pose flipPose(Pose oldPose) {
+    public static Pose FlipRoutineAlliancesOnSameSide(Pose oldPose) {
         return new Pose(
-            144 - oldPose.x(),
-            oldPose.y(),
+                144 - oldPose.x(),
+                oldPose.y(),
                 Angle.normalize(Math.PI - oldPose.heading()));
+    }
+
+    /**
+     * Pose flipper that can be used when RED and BLUE alliances are on opposite
+     * sides of the field; i.e., both the X and Y coordinates are flipped,
+     * and the heading is added to PI.
+     * @param oldPose Pose to be flipped
+     * @return new Pose
+     */public static Pose FlipRoutineAlliancesOnOppositeSides(Pose oldPose) {
+        return new Pose(
+                144 - oldPose.x(),
+                144 - oldPose.y(),
+                Angle.normalize((Math.PI + oldPose.heading())));
     }
 }

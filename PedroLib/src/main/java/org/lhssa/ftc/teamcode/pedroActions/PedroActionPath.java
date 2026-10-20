@@ -59,6 +59,11 @@ public class PedroActionPath implements PedroAction{
         return description;
     }
 
+    @Override
+    public void reset() {
+        //Do Nothing
+    }
+
     private boolean isSpeedValid() {
         return (speed != -999);
     }

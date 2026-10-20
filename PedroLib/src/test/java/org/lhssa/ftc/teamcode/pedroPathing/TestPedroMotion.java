@@ -5,11 +5,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.graphics.Bitmap;
-
 import com.pedropathing.algorithm.Foresight;
 import com.pedropathing.algorithm.ForesightConfig;
-import com.pedropathing.config.ConfigVar;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 

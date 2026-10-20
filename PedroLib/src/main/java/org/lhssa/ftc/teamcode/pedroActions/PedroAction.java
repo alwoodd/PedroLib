@@ -4,4 +4,9 @@ public interface PedroAction {
     void update();
     boolean isComplete();
     String getDescription();
+
+    /**
+     * Called by PedroActionManager
+     */
+    void reset();
 }

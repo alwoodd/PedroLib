@@ -5,6 +5,7 @@ import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 import com.pedropathing.utils.Angle;
+import com.qualcomm.robotcore.util.RobotLog;
 
 /**
  * This class manages how the Follower is used.
@@ -101,7 +102,10 @@ public class PedroMotion {
         else {
             pathComplete = isAtTargetHeading();
         }
-
+/*
+RobotLog.ii("PedroMotion.isPathComplete()", "isFollowing: %b; follower.isBusy(): %b, isAtTargetHeading: %b, pathComplete: %b",
+        isFollowing, follower.isBusy(), isAtTargetHeading(), pathComplete);
+*/
         return pathComplete;
     }
 
@@ -109,9 +113,14 @@ public class PedroMotion {
      * @return true if the robot's heading is withing EPSILON_RADIAN of its target.
      */
     boolean isAtTargetHeading() {
-        double delta = Angle.normalize(follower.pose().heading() - targetHeading);
+        //double delta = Angle.normalize(follower.pose().heading() - targetHeading);
+        double delta = follower.pose().heading() - targetHeading;
+/*
+RobotLog.ii("isatTargetHeading()", "Current heading: %.4f; targetHeading: %.4f; delta: %.4f",
+        follower.pose().heading(), targetHeading, delta);
+*/
 
-        return (Math.abs(delta) < Math.toRadians(EPSILON_RADIANS));
+        return (Math.abs(delta) < EPSILON_RADIANS);
     }
 
     /**

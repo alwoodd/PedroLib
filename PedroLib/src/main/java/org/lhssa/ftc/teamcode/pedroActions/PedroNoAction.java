@@ -28,4 +28,9 @@ public class PedroNoAction implements PedroAction{
     public String getDescription() {
         return this.description;
     }
+
+    @Override
+    public void reset() {
+        //Do Nothing
+    }
 }
