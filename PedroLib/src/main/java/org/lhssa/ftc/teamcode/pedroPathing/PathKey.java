@@ -7,22 +7,16 @@ import com.pedropathing.math.Pose;
  * Key object used by caching in TeamPaths.
  */
 public class PathKey {
-    private final Pose startPose;
-    private final Pose endPose;
+    private final Pose[] poses;
     private final HeadingInterpolationType headingInterpolationType;
 
-    public PathKey(Pose startPose, Pose endPose, HeadingInterpolationType headingInterpolationType) {
-        this.startPose = startPose;
-        this.endPose = endPose;
+    public PathKey(HeadingInterpolationType headingInterpolationType, Pose... poses) {
         this.headingInterpolationType = headingInterpolationType;
+        this.poses = poses;
     }
 
-    public Pose getStartPose() {
-        return this.startPose;
-    }
-
-    public Pose getEndPose() {
-        return this.endPose;
+    public Pose[] getPoses() {
+        return poses;
     }
 
     public HeadingInterpolationType getHeadingInterpolationType() {
@@ -39,14 +33,32 @@ public class PathKey {
         if (this == o) return true;
         if (!(o instanceof PathKey)) return false;
         PathKey other = (PathKey) o;
-        return posesEqual(this.getStartPose(), other.getStartPose()) &&
-                posesEqual(this.getEndPose(), other.getEndPose()) &&
-                getHeadingInterpolationType() == other.getHeadingInterpolationType();
+
+        boolean isEqual = true;
+        if (getHeadingInterpolationType() != other.getHeadingInterpolationType()) {
+            isEqual = false;
+        }
+        else {
+            for (int i = 0; i < poses.length; i++) {
+                if (!posesEqual(this.poses[i], other.poses[i]))
+                {
+                    isEqual = false;
+                    break;
+                }
+            }
+        }
+        return isEqual;
     }
 
     @Override
     public int hashCode() {
-        return 31 * getStartPose().hashCode() + getEndPose().hashCode() + getHeadingInterpolationType().hashCode();
+        int poseHashSum = 0;
+
+        for (Pose pose : poses) {
+            poseHashSum += pose.hashCode();
+        }
+
+        return 31 * (poseHashSum + getHeadingInterpolationType().hashCode());
     }
 
     private boolean posesEqual(Pose pose1, Pose pose2) {

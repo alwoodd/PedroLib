@@ -47,6 +47,13 @@ public class PedroPathData {
     }
 
     /**
+     * @return all poses
+     */
+    public Pose[] getAllPoses() {
+        return poses;
+    }
+
+    /**
      * Creates a genuine Path using this instance's path data.
      * @return Path
      */

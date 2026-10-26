@@ -1,7 +1,6 @@
 package org.lhssa.ftc.teamcode.pedroPathing;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,13 +9,14 @@ import com.pedropathing.algorithm.ForesightConfig;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.math.Pose;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 
 public class TestPedroMotion {
     private static PedroMotion pedroMotion;
 
-    @BeforeClass
+    @BeforeAll
     public static void createStuff() {
         Follower follower = mock(Follower.class);
 

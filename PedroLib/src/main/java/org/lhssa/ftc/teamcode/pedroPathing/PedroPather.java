@@ -11,7 +11,6 @@ import java.util.function.Function;
  * This class creates and returns Paths created from passed Poses.
  */
 public class PedroPather {
-    private final AllianceColor definedPoseColor = AllianceColor.RED;
     private final boolean mustFlip;
     private final Function<Pose, Pose> flipFunction;
 
@@ -33,35 +32,43 @@ public class PedroPather {
     }
 
     /**
-     * createPath using the passed startPose, endPose, and headingInterpolationType.
-     * The headings come from the start and end Pose headings.
+     * createPath using the passed poses, and headingInterpolationType.
      * Paths are cached, so it is ok to call this method repeatedly.
-     * @param startPose start Pose of Line
-     * @param endPose end Pose of Line
+     * @param poses Array of Poses
      * @param headingInterpolationType LINEAR, TANGENT, CONSTANT
-     * @return Path
+     * @return PedroPathData
      */
-    public PedroPathData pathBetween(Pose startPose, Pose endPose, HeadingInterpolationType headingInterpolationType) {
-        PathKey k = new PathKey(startPose, endPose, headingInterpolationType);
+    public PedroPathData pathBetween(HeadingInterpolationType headingInterpolationType, Pose... poses) {
+        PathKey k = new PathKey(headingInterpolationType, poses);
         if (cache.containsKey(k)) {
             return cache.get(k);
         }
         else {
-            PedroPathData newPath = createPath(headingInterpolationType, startPose, endPose);
-            //newPath = setHeadingInterpolation(startPose, endPose, newPath, headingInterpolationType);
+            PedroPathData newPath = createPath(headingInterpolationType, poses);
             cache.put(k, newPath);
             return newPath;
         }
     }
 
     /**
-     * createPath using the passed startPose and endPose.
-     * The headings come from the start and end Pose headings,
-     * and the heading interpolation is LINEAR.
+     * Create PedroPathData using the passed startPose, endPose, and headingInterpolationType.
      * Paths are cached, so it is ok to call this method repeatedly.
      * @param startPose start Pose of Line
      * @param endPose end Pose of Line
-     * @return Path
+     * @param headingInterpolationType LINEAR, TANGENT, CONSTANT
+     * @return PedroPathData
+     */
+    public PedroPathData pathBetween(Pose startPose, Pose endPose, HeadingInterpolationType headingInterpolationType) {
+        return pathBetween(headingInterpolationType, startPose, endPose);
+    }
+
+    /**
+     * Create PedroPathData using the passed startPose and endPose.
+     * The heading interpolation is LINEAR.
+     * Paths are cached, so it is ok to call this method repeatedly.
+     * @param startPose start Pose of Line
+     * @param endPose end Pose of Line
+     * @return PedroPathData
      */
     public PedroPathData pathBetween(Pose startPose, Pose endPose) {
         return this.pathBetween(startPose, endPose, HeadingInterpolationType.LINEAR);
@@ -83,26 +90,25 @@ public class PedroPather {
     }
 
     /**
-     * Create a straight line Path using the passed start and end Poses.
+     * Create a PedroPathData.
      * The passed Poses are flipped as needed.
-     * @param startPose start Pose of Line
-     * @param endPose end Pose of Line
-     * @return Path
+     * @param headingInterpolationType HeadingInterpolationType
+     * @param poses two or more Poses
+     * @return PedroPathData
      */
-    private PedroPathData createPath(HeadingInterpolationType headingInterpolationType, Pose startPose, Pose endPose) {
-        Pose workingStartPose;
-        Pose workingEndPose;
+    private PedroPathData createPath(HeadingInterpolationType headingInterpolationType, Pose[] poses) {
+        Pose[] workingPoses = new Pose[poses.length];
 
-        if (mustFlip) {
-            workingStartPose = flipFunction.apply(startPose);
-            workingEndPose = flipFunction.apply(endPose);
-        }
-        else {
-            workingStartPose = startPose;
-            workingEndPose = endPose;
+        for(int i = 0; i < poses.length; i++) {
+            if (mustFlip) {
+                workingPoses[i] = flipFunction.apply(poses[i]);
+            }
+            else {
+                workingPoses[i] = poses[i];
+            }
         }
 
-        return new PedroPathData(headingInterpolationType, workingStartPose, workingEndPose);
+        return new PedroPathData(headingInterpolationType, workingPoses);
     }
 
     /**

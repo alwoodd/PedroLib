@@ -55,6 +55,9 @@ public class PedroActionManager {
         return actionStep.hasNext();
     }
 
+    /**
+     * Once called, all calls to hasNext() return false.
+     */
     public void ignoreRemainingActions() {
         ignoreRemainingActions = true;
     }
