@@ -3,7 +3,7 @@ package org.lhssa.ftc.teamcode.pedroActions;
 import java.util.function.Supplier;
 
 /**
- * This PedroAction runs the provided Supplier<Boolean> during update(),
+ * This PedroAction runs the provided {@code Supplier<Boolean>} during update(),
  * and sets isComplete() to the boolean returned by that provided function.
  */
 public class PedroActionRunUntilComplete implements PedroAction {

@@ -23,7 +23,7 @@ public class PedroPather {
      * or any other implementation that takes and returns a Pose.
      * @param canonicalColor The default AllianceColor
      * @param allianceColor  The current AllianceColor
-     * @param flipFunction A Function<Pose, Pose> called to correctly flip a Pose.
+     * @param flipFunction A {@code Function<Pose, Pose>} called to correctly flip a Pose.
      */
     public PedroPather(AllianceColor canonicalColor, AllianceColor allianceColor, Function<Pose,Pose> flipFunction) {
         this.mustFlip = allianceColor != canonicalColor;
