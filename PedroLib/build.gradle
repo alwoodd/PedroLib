@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.github.alwoodd'
-version = '3.1.0'
+version = '3.2.1'
 
 android {
     namespace 'org.lhssa.ftc.teamcode.pedroPathing'
@@ -54,6 +54,10 @@ tasks.withType(Test).configureEach {
             ["-javaagent:${mockitoAgent.asPath}"]
         }
     })
+}
+
+tasks.withType(GenerateModuleMetadata).configureEach {
+    enabled = false
 }
 
 afterEvaluate {
