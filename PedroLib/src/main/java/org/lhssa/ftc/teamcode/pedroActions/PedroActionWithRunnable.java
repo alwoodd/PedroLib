@@ -6,7 +6,9 @@ import org.lhssa.ftc.teamcode.pedroPathing.PedroPathData;
 /**
  * PedroAction that follows the passed Path, then runs the passed callback
  * at Path completion.
+ * @deprecated Use PedroActionRunUntilComplete instead.
  */
+@Deprecated
 public class PedroActionWithRunnable implements PedroAction {
     private final PedroPathData path;
     private final Runnable callBack;

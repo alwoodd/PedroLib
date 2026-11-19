@@ -13,7 +13,7 @@ public class PedroPathData {
     private final HeadingInterpolationType headingInterpolationType;
 
     /**
-     * Construct using 0-to-many Poses. Note that passing <2 poses won't work right.
+     * Construct using 0-to-many Poses. Note that passing less than 2 poses won't work right.
      * Poses are stored in the order they are provided.
      * @param headingInterpolationType HeadingInterpolationType
      * @param poses Provide at least 2 Poses
